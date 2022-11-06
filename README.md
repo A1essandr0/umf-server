@@ -1,2 +1,2 @@
 # umf-server
-Source for UMF backend
+Source for UMF api

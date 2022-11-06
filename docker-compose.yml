@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+
+  keydb:
+    image: eqalpha/keydb:latest
+    container_name: keydb-umf
+    command: keydb-server /etc/keydb/redis.conf --server-threads 2
+    restart: "no"
+    volumes:
+      - ./docker-data/redis.conf:/etc/keydb/redis.conf
+      - ./docker-data/keydb-data:/data
+    ports:
+      - "6379:6379"
+
+  db:
+    image: postgres:latest
+    container_name: pg-umf
+    environment:
+      POSTGRES_DB: umf
+      POSTGRES_USER: umf_user
+      POSTGRES_PASSWORD: umf_pwd
+    restart: "no"
+    volumes:
+      - ./docker-data/postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+
+  # umf-service:
+  #   image: umf-service:latest
+  #   container_name: umf-service
+  #   environment:
+  #     WEB_PORT: ${WEB_PORT}
+  #     HASH_LENGTH: ${HASH_LENGTH}
+  #     DEFAULT_TTL: ${DEFAULT_TTL}
+  #     REDIS_ADDR: ${REDIS_ADDR}
+  #     REDIS_PWD: ${REDIS_PWD}
+  #     REDIS_DB_NUM: ${REDIS_DB_NUM}
+  #     DB_DSN: ${DB_DSN}
+  #   restart: "no"
+  #   ports:
+  #   volumes:
+      
