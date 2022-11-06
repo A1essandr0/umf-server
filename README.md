@@ -1,2 +1,2 @@
 # umf-server
-u.memoricci.fun server
+Source for UMF backend
