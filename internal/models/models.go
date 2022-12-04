@@ -9,6 +9,7 @@ type RequestBody struct {
 }
 type ResponseBody struct {
 	Link string
+	OriginalUrl string
 }
 
 // TODO user profile data

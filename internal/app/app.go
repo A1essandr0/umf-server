@@ -80,7 +80,7 @@ func serve(w http.ResponseWriter, r *http.Request) {
 
 func createLink(w http.ResponseWriter, r *http.Request) {
 	var payload models.RequestBody
-	var response = &models.ResponseBody{Link: ""}
+	var response = &models.ResponseBody{Link: "", OriginalUrl: ""}
 	var key string
 	r.Body = http.MaxBytesReader(w, r.Body, 8192)
 
@@ -91,6 +91,7 @@ func createLink(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(r.Header)
 	log.Printf("received: %+v\n", payload)
+	response.OriginalUrl = payload.Url
 
 	// TODO also return http errors 
 	if payload.Alias == "" {
@@ -109,6 +110,7 @@ func createLink(w http.ResponseWriter, r *http.Request) {
 			return 
 		}
 		response.Link = key
+		
 
 	} else {
 		_, err := redisClient.GetKVStoreRecord(payload.Alias)
