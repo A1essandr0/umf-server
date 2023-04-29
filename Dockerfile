@@ -4,11 +4,10 @@ WORKDIR /install
 
 COPY go.mod ./go.mod
 COPY go.sum ./go.sum
+RUN go mod download
+
 COPY cmd cmd
 COPY internal internal
-
-
-RUN go mod download
 RUN CGO_ENABLED=0 go build -o umf /install/cmd/umf/main.go
 
 
