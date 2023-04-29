@@ -3,8 +3,6 @@ package app
 import (
 	"log"
 	"net/http"
-
-	"github.com/A1essandr0/umf-server/internal/config"
 )
 
 
@@ -16,10 +14,10 @@ func mockMiddleWare(next http.Handler) http.Handler {
 
 func corsMiddleWare(next http.Handler) http.Handler {
 	var allowedCors string
-	if config.DEVELOPMENT_MODE == "development" {
+	if Config.DEVELOPMENT_MODE == "development" {
 		allowedCors = "*"
-	} else if config.DEVELOPMENT_MODE == "production" {
-		allowedCors = config.PRODUCTION_CORS
+	} else if Config.DEVELOPMENT_MODE == "production" {
+		allowedCors = Config.PRODUCTION_CORS
 	}
 	
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

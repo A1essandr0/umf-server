@@ -1,0 +1,21 @@
+DEVELOPMENT_MODE: "development"
+
+WEB_PORT: "0.0.0.0:10007"
+
+PRODUCTION_CORS: "*"
+
+DEFAULT_TTL: 0
+
+REDIS_ADDR: "localhost:6379"
+REDIS_PWD: "1qazxsw23edcxz"
+REDIS_DB_NUM: 0
+
+DB_DSN: "host=localhost user=umf_user password=umf_pwd dbname=umf port=5432 sslmode=disable"
+
+USE_TLS: false
+CERT_FILE: ""
+CERT_KEY_FILE: ""
+
+DEFAULT_RECORDS_AMOUNT_TO_GET: 5
+HASH_LENGTH: 8
+

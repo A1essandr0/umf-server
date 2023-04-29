@@ -1,32 +1,31 @@
 package config
 
 import (
-	"strconv"
+	"log"
 
-	"github.com/A1essandr0/umf-server/internal/utils"
+	"github.com/A1essandr0/umf-server/internal/models"
+	"github.com/spf13/viper"
 )
 
-var (
-	DEVELOPMENT_MODE = utils.GetEnv("DEVELOPMENT_MODE", "development")
-	WEB_PORT = utils.GetEnv("WEB_PORT", "0.0.0.0:10007")
-	PRODUCTION_CORS = "*" // TODO
+func Init(env string) models.Config {
+	var conf models.Config
 
-	// time to live in hours, 0 means no ttl
-	DEFAULT_TTL, _ = strconv.Atoi(utils.GetEnv("DEFAULT_TTL", "0"))
+	viper.SetConfigType("yaml")
+	viper.SetConfigName(env)
+	viper.AddConfigPath("./cmd")
 
-	REDIS_ADDR = utils.GetEnv("REDIS_ADDR", "localhost:6379")
-	REDIS_PWD = utils.GetEnv("REDIS_PWD", "pwd")
-	REDIS_DB_NUM, _ = strconv.Atoi(utils.GetEnv("REDIS_DB_NUM", "0"))
+	viper.SetEnvPrefix("UMF")
+	viper.AutomaticEnv()
 
-	// TODO proper dsn forming
-	DB_DSN = utils.GetEnv("DB_DSN", "host=localhost user=umf_user dbname=umf port=5432 sslmode=disable")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error on parsing configuration file: %+v", err)
+	}
+	err = viper.Unmarshal(&conf)
+	if err != nil {
+		log.Fatal("Error on unmarshal config to struct")
+	}
+	log.Printf("Loaded config: %+v", conf)
 
-	USE_TLS = utils.GetEnv("USE_TLS", "true")
-	CERT_FILE = utils.GetEnv("CERT_FILE", "")
-	CERT_KEY_FILE = utils.GetEnv("CERT_KEY_FILE", "")
-
-	DEFAULT_RECORDS_AMOUNT_TO_GET = 5
-	HASH_LENGTH, _ = strconv.Atoi(utils.GetEnv("HASH_LENGTH", "8"))
-)
-
-
+	return conf
+}

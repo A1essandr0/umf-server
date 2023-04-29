@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/A1essandr0/umf-server/internal/config"
 	"github.com/A1essandr0/umf-server/internal/models"
 	"github.com/A1essandr0/umf-server/internal/utils"
 	"github.com/go-redis/redis/v8"
@@ -43,7 +42,7 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 	// TODO also return http errors 
 	if payload.Alias == "" {
 		for {
-			key = utils.CreateUUID(config.HASH_LENGTH)
+			key = utils.CreateUUID(Config.HASH_LENGTH)
 			_, err := RedisClient.GetKVStoreRecord(key)
 			if err != redis.Nil && err != nil { 
 				log.Printf("Error while checking uuid key existence: %s; %v", key, err)
@@ -127,12 +126,12 @@ func GetLink(w http.ResponseWriter, r *http.Request) {
 
 func GetRecords(w http.ResponseWriter, r *http.Request) {
 	userIP, _ := utils.GetIP(r)
-	log.Printf("Getting %d records...\n", config.DEFAULT_RECORDS_AMOUNT_TO_GET)
+	log.Printf("Getting %d records...\n", Config.DEFAULT_RECORDS_AMOUNT_TO_GET)
 	
 	var records []models.NewLinkEvent
 	DB.Where(&models.NewLinkEvent{UserIP: userIP},
 		).Order("created_at desc",
-		).Limit(config.DEFAULT_RECORDS_AMOUNT_TO_GET,
+		).Limit(Config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 		).Find(&records) 
 
 	results := &models.RecordsResponse{Count: len(records), IP: userIP}

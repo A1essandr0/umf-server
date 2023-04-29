@@ -13,13 +13,15 @@ import (
 )
 
 func main() {
+	config := config.Init("config")
+
 	routes := []router.RoutePattern{
 		router.NewRoute("POST", "/create", app.CreateLink),
 		router.NewRoute("GET",  "/records", app.GetRecords),
 		router.NewRoute("GET",  "/([a-zA-Z0-9_-]{2,32})", app.GetLink),
 	}
 
-	redisClient, redisError := redisclient.NewRedisClient()
+	redisClient, redisError := redisclient.NewRedisClient(config)
 	if redisError != nil {
 		log.Fatalf("Failed to connect to redis: %s", redisError.Error())
 	}
@@ -37,5 +39,5 @@ func main() {
 	DB.AutoMigrate(&models.NewLinkEvent{}, &models.ClickEvent{})
 	log.Println("DB initialised")
 
-	app.Run(routes, DB, redisClient)
+	app.Run(routes, config, DB, redisClient)
 }
