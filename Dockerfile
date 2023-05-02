@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY cmd cmd
 COPY internal internal
-RUN CGO_ENABLED=0 go build -o umf /install/cmd/umf/main.go
+RUN CGO_ENABLED=0 go build -o umf /install/cmd/main.go
 
 
 FROM gcr.io/distroless/static-debian11

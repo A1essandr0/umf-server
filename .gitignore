@@ -24,6 +24,6 @@ docker-data/
 .vscode/
 
 # somewhat sensitive
-build_deploy_azurevm.sh
+build_deploy_regruvm.sh
 run_locally.sh
 *.service
