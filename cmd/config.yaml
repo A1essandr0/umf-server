@@ -4,13 +4,16 @@ WEB_PORT: "0.0.0.0:10007"
 
 PRODUCTION_CORS: "*"
 
+KVSTORE_TYPE: "redis"
 DEFAULT_TTL: 0
 
 REDIS_ADDR: "localhost:6379"
 REDIS_PWD: "1qazxsw23edcxz"
 REDIS_DB_NUM: 0
 
+DBSTORE_TYPE: "postgres"
 DB_DSN: "host=localhost user=umf_user password=umf_pwd dbname=umf port=5432 sslmode=disable"
+APPLY_MIGRATIONS: true
 
 USE_TLS: false
 CERT_FILE: ""

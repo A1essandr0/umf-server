@@ -3,6 +3,10 @@ package models
 import "gorm.io/gorm"
 
 
+var ModelsToAutoMigrate = []interface{} {
+	&NewLinkEvent{}, &ClickEvent{},
+}
+
 type RequestBody struct {
 	Url string
 	Alias string

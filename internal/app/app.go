@@ -6,23 +6,27 @@ import (
 	"net/http"
 
 	"github.com/A1essandr0/umf-server/internal/models"
-	"github.com/A1essandr0/umf-server/internal/redisclient"
+	"github.com/A1essandr0/umf-server/internal/repositories"
 	"github.com/A1essandr0/umf-server/internal/router"
-	"gorm.io/gorm"
 )
 
 type ctxKey struct{}
 
 var (
 	Routes []router.RoutePattern
-	RedisClient *redisclient.RedisClient
-	DB *gorm.DB
+	KVClient repositories.KeyValueStore
+	DB repositories.DBStore
 	Config models.Config
 )
 
-func Run(routes []router.RoutePattern, conf models.Config, db *gorm.DB, redisClient *redisclient.RedisClient) {
+func Run(
+	conf models.Config,
+	routes []router.RoutePattern,
+	db repositories.DBStore,
+	kvClient repositories.KeyValueStore,
+) {
 	DB = db
-	RedisClient = redisClient
+	KVClient = kvClient
 	Routes = routes
 	Config = conf
 
@@ -31,7 +35,7 @@ func Run(routes []router.RoutePattern, conf models.Config, db *gorm.DB, redisCli
 		Addr: Config.WEB_PORT,
 		Handler: corsMiddleWare(http.HandlerFunc(serve)),
 	}
-	if Config.USE_TLS == true {
+	if Config.USE_TLS {
 		log.Printf("Starting https server on %s, mode: %s", Config.WEB_PORT, Config.DEVELOPMENT_MODE)
 		httpStartError = server.ListenAndServeTLS(Config.CERT_FILE, Config.CERT_KEY_FILE)
 	} else {

@@ -43,14 +43,14 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 	if payload.Alias == "" {
 		for {
 			key = utils.CreateUUID(Config.HASH_LENGTH)
-			_, err := RedisClient.GetKVStoreRecord(key)
+			_, err := KVClient.GetKVStoreRecord(key)
 			if err != redis.Nil && err != nil { 
 				log.Printf("Error while checking uuid key existence: %s; %v", key, err)
 				return 
 			}
 			if err == redis.Nil { break }
 		}
-		err := RedisClient.CreateKVStoreRecord(key, payload.Url)
+		err := KVClient.CreateKVStoreRecord(key, payload.Url)
 		if err != nil { 
 			log.Printf("Error while creating uuid key: %s; %v", key, err)
 			return 
@@ -59,7 +59,7 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 		
 
 	} else {
-		_, err := RedisClient.GetKVStoreRecord(payload.Alias)
+		_, err := KVClient.GetKVStoreRecord(payload.Alias)
 		if err != nil && err != redis.Nil {
 			log.Printf("Error while checking alias key existence: %s; %v", key, err)
 			return 
@@ -70,7 +70,7 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = RedisClient.CreateKVStoreRecord(payload.Alias, payload.Url)
+		err = KVClient.CreateKVStoreRecord(payload.Alias, payload.Url)
 		if err != nil { 
 			log.Printf("Error while creating alias key: %s; %v", key, err)
 			return 
@@ -79,12 +79,7 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userIP, _ := utils.GetIP(r)
-
-	DB.Create(&models.NewLinkEvent{
-		Key: response.Link,
-		Value: payload.Url,
-		UserIP: userIP,
-	})
+	DB.CreateNewLinkEvent(response.Link, payload.Url, userIP)
 
 	marshaled, err := json.Marshal(response)
 	if err == nil {
@@ -100,7 +95,7 @@ func GetLink(w http.ResponseWriter, r *http.Request) {
 	fields := r.Context().Value(ctxKey{}).([]string)
 	link := fields[0]
 
-	value, err := RedisClient.GetKVStoreRecord(link)
+	value, err := KVClient.GetKVStoreRecord(link)
 	if err != nil && err != redis.Nil {
 		log.Printf("Error while getting value for the key: %s;\n %v\n", link, err)
 		return
@@ -112,12 +107,7 @@ func GetLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userIP, _ := utils.GetIP(r)
-
-	DB.Create(&models.ClickEvent{
-		Key: link,
-		Value: value,
-		UserIP: userIP,
-	})
+	DB.CreateClickEvent(link, value, userIP)
 
 	log.Printf("Got url: %s, redirecting...", value)
 	http.Redirect(w, r, value, http.StatusFound)
@@ -128,11 +118,7 @@ func GetRecords(w http.ResponseWriter, r *http.Request) {
 	userIP, _ := utils.GetIP(r)
 	log.Printf("Getting %d records...\n", Config.DEFAULT_RECORDS_AMOUNT_TO_GET)
 	
-	var records []models.NewLinkEvent
-	DB.Where(&models.NewLinkEvent{UserIP: userIP},
-		).Order("created_at desc",
-		).Limit(Config.DEFAULT_RECORDS_AMOUNT_TO_GET,
-		).Find(&records) 
+	records := DB.GetNewLinkEvents(userIP)
 
 	results := &models.RecordsResponse{Count: len(records), IP: userIP}
 	for _, record := range records {
