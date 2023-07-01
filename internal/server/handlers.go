@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"context"
@@ -12,11 +12,17 @@ import (
 )
 
 
-func serve(w http.ResponseWriter, r *http.Request) {
+func ServeMux(w http.ResponseWriter, r *http.Request) {
+	Routes := []RoutePattern{
+		NewRoute("POST", "/create", CreateLink), // TODO use controller interface
+		NewRoute("GET",  "/records", GetRecords),
+		NewRoute("GET",  "/([a-zA-Z0-9_-]{2,32})", GetLink),
+	}
+
 	for _, route := range Routes {
 		matches := route.Regex.FindStringSubmatch(r.URL.Path)
 		if len(matches) > 0 && r.Method == route.Method {
-			ctx := context.WithValue(r.Context(), ctxKey{}, matches[1:])
+			ctx := context.WithValue(r.Context(), struct{}{}, matches[1:])
 			route.Handler(w, r.WithContext(ctx))
 			return 
 		}
@@ -92,7 +98,7 @@ func CreateLink(w http.ResponseWriter, r *http.Request) {
 
 
 func GetLink(w http.ResponseWriter, r *http.Request) {
-	fields := r.Context().Value(ctxKey{}).([]string)
+	fields := r.Context().Value(struct{}{}).([]string)
 	link := fields[0]
 
 	value, err := KVClient.GetKVStoreRecord(link)

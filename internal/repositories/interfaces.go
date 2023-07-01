@@ -23,6 +23,7 @@ type DBStore interface {
 
 func NewKVStore(config models.Config) (KeyValueStore, error) {
 	switch config.KVSTORE_TYPE {
+		// TODO mocked store
 
 		default:
 			client := redis.NewClient(&redis.Options{
@@ -41,6 +42,7 @@ func NewKVStore(config models.Config) (KeyValueStore, error) {
 
 func NewDBStore(config models.Config) (DBStore, error) {
 	switch config.DBSTORE_TYPE {
+		// TODO mocked store
 		
 		default:
 			DB, err := gorm.Open(postgres.New(postgres.Config{

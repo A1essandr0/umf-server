@@ -16,7 +16,6 @@ type ResponseBody struct {
 	OriginalUrl string
 }
 
-// TODO user profile data
 type NewLinkEvent struct {
 	gorm.Model 
 	Key string
@@ -29,7 +28,6 @@ type ClickEvent struct {
 	Value string
 	UserIP string
 }
-
 
 type RecordResponse struct {
 	Shorturl string

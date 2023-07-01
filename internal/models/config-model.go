@@ -14,7 +14,6 @@ type Config struct {
 	REDIS_DB_NUM int `mapstructure:"redis_db_num" json:"redis_db_num"`
 
 	DBSTORE_TYPE string `mapstructure:"dbstore_type" json:"dbstore_type"`
-	// TODO proper dsn forming
 	DB_DSN string `mapstructure:"db_dsn" json:"db_dsn"`
 	APPLY_MIGRATIONS bool `mapstructure:"apply_migrations" json:"apply_migrations"`
 
@@ -25,4 +24,3 @@ type Config struct {
 	DEFAULT_RECORDS_AMOUNT_TO_GET int `mapstructure:"default_records_amount_to_get" json:"default_records_amount_to_get"`
 	HASH_LENGTH int `mapstructure:"hash_length" json:"hash_length"`
 }
-
