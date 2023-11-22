@@ -25,5 +25,4 @@ docker-data/
 
 # somewhat sensitive
 build_deploy_regruvm.sh
-run_locally.sh
 *.service

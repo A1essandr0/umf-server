@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func Init(env string) models.Config {
+func Init(env string) *models.Config {
 	var conf models.Config
 
 	viper.SetConfigType("yaml")
@@ -27,5 +27,5 @@ func Init(env string) models.Config {
 	}
 	log.Printf("Loaded config: %+v", conf)
 
-	return conf
+	return &conf
 }

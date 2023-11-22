@@ -4,9 +4,11 @@ import (
 	"log"
 
 	"github.com/A1essandr0/umf-server/internal/models"
+	"github.com/glebarez/sqlite"
 	"github.com/go-redis/redis/v8"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type KeyValueStore interface {
@@ -21,7 +23,7 @@ type DBStore interface {
 }
 
 
-func NewKVStore(config models.Config) (KeyValueStore, error) {
+func NewKVStore(config *models.Config) (KeyValueStore, error) {
 	switch config.KVSTORE_TYPE {
 		// TODO mocked store
 
@@ -40,27 +42,48 @@ func NewKVStore(config models.Config) (KeyValueStore, error) {
 }
 
 
-func NewDBStore(config models.Config) (DBStore, error) {
-	switch config.DBSTORE_TYPE {
-		// TODO mocked store
-		
-		default:
+func NewDBStore(config *models.Config) (DBStore, error) {
+	switch config.DBSTORE_TYPE {		
+		case "postgres":
 			DB, err := gorm.Open(postgres.New(postgres.Config{
 				DSN: config.DB_DSN,
 				PreferSimpleProtocol: false,
 			}), &gorm.Config{
-				// Logger: logger.Default.LogMode(logger.Info),
+				Logger: logger.Default.LogMode(logger.Info),
 			})
 			if err != nil {
 				return nil, err
 			}
 
 			if config.APPLY_MIGRATIONS {
-				DB.AutoMigrate(models.ModelsToAutoMigrate...)
+                if err = DB.AutoMigrate(models.ModelsToAutoMigrate...); err != nil {
+					log.Println("Couldn't apply or recognize Postgres DB schema")
+					return nil, err
+				}
+				log.Println("Postgres migrations applied")
 			}
 			
 			log.Println("Postgres DB initialised")
 			return &PStore{
+				DB: DB,
+				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
+			}, nil
+		
+		default:
+			DB, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
+				Logger: logger.Default.LogMode(logger.Info),
+			})
+			if err != nil {
+				return nil, err
+			}
+			if err = DB.AutoMigrate(models.ModelsToAutoMigrate...); err != nil {
+				log.Println("Couldn't apply or recognize inmemory DB schema")
+				return nil, err
+			}
+			log.Println("Inmemory migrations applied")
+
+			log.Println("Inmemory DB initialised")
+			return &MStore{
 				DB: DB,
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}, nil

@@ -12,10 +12,10 @@ import (
 var (
 	KVClient repositories.KeyValueStore
 	DB repositories.DBStore
-	Config models.Config
+	Config *models.Config
 )
 
-func Run(conf models.Config, db repositories.DBStore, kvClient repositories.KeyValueStore) {
+func Run(conf *models.Config, db repositories.DBStore, kvClient repositories.KeyValueStore) {
 	Config = conf
 	DB = db
 	KVClient = kvClient
