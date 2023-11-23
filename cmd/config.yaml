@@ -13,7 +13,6 @@ REDIS_DB_NUM: 0
 
 DBSTORE_TYPE: "postgres"
 DB_DSN: "postgres://umf_user:umf_pwd@localhost:5432/umf?sslmode=disable"
-# DB_DSN: "host=localhost user=umf_user password=umf_pwd dbname=umf port=5432 sslmode=disable"
 APPLY_MIGRATIONS: true
 
 USE_TLS: false

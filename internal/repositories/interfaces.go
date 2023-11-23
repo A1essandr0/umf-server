@@ -23,26 +23,29 @@ type DBStore interface {
 }
 
 
-func NewKVStore(config *models.Config) (KeyValueStore, error) {
+func NewKVStore(config *models.Config) KeyValueStore {
 	switch config.KVSTORE_TYPE {
-		// TODO mocked store
-
-		default:
+		case "redis":
 			client := redis.NewClient(&redis.Options{
 				Addr:     config.REDIS_ADDR, 
 				Password: config.REDIS_PWD,
 				DB:       config.REDIS_DB_NUM,
 			})
 			if err := client.Ping(client.Context()).Err(); err != nil {
-				return nil, err
+				log.Fatalf("Failed to initialise key-value store: %+v", err)
 			}
 			log.Printf("Got key/value store instance up on %s", config.REDIS_ADDR)
-			return &RedisClient{client, config.DEFAULT_TTL}, nil
+			return &RedisClient{client, config.DEFAULT_TTL}
+		
+		default:
+			log.Println("Using inmemory key-value store")
+			mapStore := make(map[string]string)
+			return &InmemoryKV{store: mapStore}
 	}
 }
 
 
-func NewDBStore(config *models.Config) (DBStore, error) {
+func NewDBStore(config *models.Config) DBStore {
 	switch config.DBSTORE_TYPE {		
 		case "postgres":
 			DB, err := gorm.Open(postgres.New(postgres.Config{
@@ -52,13 +55,12 @@ func NewDBStore(config *models.Config) (DBStore, error) {
 				Logger: logger.Default.LogMode(logger.Info),
 			})
 			if err != nil {
-				return nil, err
+				log.Fatalf("Failed to initialise database: %+v", err)
 			}
 
 			if config.APPLY_MIGRATIONS {
                 if err = DB.AutoMigrate(models.ModelsToAutoMigrate...); err != nil {
-					log.Println("Couldn't apply or recognize Postgres DB schema")
-					return nil, err
+					log.Fatalf("Couldn't apply or recognize Postgres DB schema^ %+v", err)
 				}
 				log.Println("Postgres migrations applied")
 			}
@@ -67,18 +69,17 @@ func NewDBStore(config *models.Config) (DBStore, error) {
 			return &PStore{
 				DB: DB,
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
-			}, nil
+			}
 		
 		default:
 			DB, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
 				Logger: logger.Default.LogMode(logger.Info),
 			})
 			if err != nil {
-				return nil, err
+				log.Fatalf("Failed to initialise database: %+v", err)
 			}
 			if err = DB.AutoMigrate(models.ModelsToAutoMigrate...); err != nil {
-				log.Println("Couldn't apply or recognize inmemory DB schema")
-				return nil, err
+				log.Fatalf("Couldn't apply or recognize inmemory DB schema: %+v", err)
 			}
 			log.Println("Inmemory migrations applied")
 
@@ -86,6 +87,6 @@ func NewDBStore(config *models.Config) (DBStore, error) {
 			return &MStore{
 				DB: DB,
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
-			}, nil
+			}
 	}
 }
