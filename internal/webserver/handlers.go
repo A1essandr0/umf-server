@@ -2,6 +2,7 @@ package webserver
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -12,10 +13,8 @@ import (
 
 
 func (router *Router) CreateLink(w http.ResponseWriter, r *http.Request) {
-	var key string
 	var payload models.RequestBody
-	var response = &models.ResponseBody{Link: "", OriginalUrl: ""}
-
+	userIP, _ := utils.GetIP(r)
 	r.Body = http.MaxBytesReader(w, r.Body, 8192)
 	defer r.Body.Close()
 
@@ -25,62 +24,17 @@ func (router *Router) CreateLink(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	// log.Println(r.Header)
 	log.Printf("received: %+v\n", payload)
-	response.OriginalUrl = payload.Url
 
-
-
-	if payload.Alias == "" {
-		for {
-			key = utils.CreateUUID(router.Config.HASH_LENGTH)
-			_, err := router.LinksController.KV.GetKVStoreRecord(key)
-			// _, err := router.LinksController.KV.GetKVStoreRecord(key)
-			if err != redis.Nil && err != nil { 
-				log.Printf("Error while checking uuid key existence: %s; %v", key, err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return 
-			}
-			if err == redis.Nil { break }
-		}
-		err := router.LinksController.KV.CreateKVStoreRecord(key, payload.Url)
-		// err := router.LinksController.KV.CreateKVStoreRecord(key, payload.Url)
-		if err != nil { 
-			log.Printf("Error while creating uuid key: %s; %v", key, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return 
-		}
-		response.Link = key
-		
-	} else {
-		_, err := router.LinksController.KV.GetKVStoreRecord(payload.Alias)
-		// _, err := router.LinksController.KV.GetKVStoreRecord(payload.Alias)
-		if err != nil && err != redis.Nil {
-			log.Printf("Error while checking alias key existence: %s; %v", key, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return 
-		}
-		if err != redis.Nil {
-			log.Printf("Alias key already exists: %s", payload.Alias)
-			http.Error(w, "Alias key already exists", http.StatusConflict)
-			return
-		}
-
-		err = router.LinksController.KV.CreateKVStoreRecord(payload.Alias, payload.Url)
-		// err = router.LinksController.KV.CreateKVStoreRecord(payload.Alias, payload.Url)
-		if err != nil { 
-			log.Printf("Error while creating alias key: %s; %v", key, err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return 
-		}
-		response.Link = payload.Alias
+	response, err := router.LinksController.CreateLink(payload, router.Config.HASH_LENGTH, userIP)
+	if err != nil && !errors.Is(err, &models.KeyAlreadyExists{}) {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return 
 	}
-
-	userIP, _ := utils.GetIP(r)
-	router.RecordsController.DB.CreateNewLinkEvent(response.Link, payload.Url, userIP)
-	// router.RecordsController.DB.CreateNewLinkEvent(response.Link, payload.Url, userIP)
-
-
+	if err != nil && errors.Is(err, &models.KeyAlreadyExists{}) {
+		http.Error(w, err.Error(), http.StatusConflict)
+		return
+	}
 
 	marshaled, err := json.Marshal(response)
 	if err == nil {

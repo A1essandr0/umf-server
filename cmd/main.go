@@ -15,7 +15,7 @@ func main() {
 	dbStore := repositories.NewDBStore(config)
 
 	linksController := controllers.NewLinksController(kvStore, dbStore)
-	recordsController := controllers.NewRecordsController(kvStore, dbStore)
+	recordsController := controllers.NewRecordsController(dbStore)
 	
 	webServer := webserver.NewServer(
 		config,
@@ -25,7 +25,4 @@ func main() {
 
 	application := &app.AppContainer{Server: webServer}
 	application.Run()
-
-	// DEPRECATED
-	// dserver.Run(config, dbStore, kvStore)
 }

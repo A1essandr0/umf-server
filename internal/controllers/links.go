@@ -1,7 +1,12 @@
 package controllers
 
 import (
+	"log"
+
+	"github.com/A1essandr0/umf-server/internal/models"
 	"github.com/A1essandr0/umf-server/internal/repositories"
+	"github.com/A1essandr0/umf-server/internal/utils"
+	"github.com/go-redis/redis/v8"
 )
 
 
@@ -24,6 +29,47 @@ func (c *LinksController) GetLink(link string, ip string) (string, error) {
 	return value, err
 }
 
-func (c *LinksController) CreateLink() {
+func (c *LinksController) CreateLink(payload models.RequestBody, hashLength int, ip string) (*models.ResponseBody, error) {
+	var key string
+	var response = &models.ResponseBody{Link: "", OriginalUrl: payload.Url}
 
+	if payload.Alias == "" {
+		for {
+			key = utils.CreateUUID(hashLength)
+			_, err := c.KV.GetKVStoreRecord(key)
+			if err != redis.Nil && err != nil { 
+				log.Printf("Error while checking uuid key existence: %s; %+v", key, err)
+				return nil, err
+			}
+			if err == redis.Nil { break }
+		}
+		err := c.KV.CreateKVStoreRecord(key, payload.Url)
+		if err != nil { 
+			log.Printf("Error while creating uuid key: %s; %v", key, err)
+			return nil, err
+		}
+		response.Link = key
+		
+	} else {
+		_, err := c.KV.GetKVStoreRecord(payload.Alias)
+		if err != nil && err != redis.Nil {
+			log.Printf("Error while checking alias key existence: %s; %+v", key, err)
+			return nil, err
+		}
+		if err != redis.Nil {
+			log.Printf("Alias key already exists: %s", payload.Alias)
+			return nil, &models.KeyAlreadyExists{}
+		}
+
+		err = c.KV.CreateKVStoreRecord(payload.Alias, payload.Url)
+		if err != nil { 
+			log.Printf("Error while creating alias key: %s; %v", key, err)
+			return nil, err
+		}
+		response.Link = payload.Alias
+	}
+
+	c.DB.CreateNewLinkEvent(response.Link, payload.Url, ip)
+
+	return response, nil
 }

@@ -15,6 +15,7 @@ type Config struct {
 
 	DBSTORE_TYPE string `mapstructure:"dbstore_type" json:"dbstore_type"`
 	DB_DSN string `mapstructure:"db_dsn" json:"db_dsn"`
+	DB_FILE string `mapstructure:"db_file" json:"db_file"`
 	APPLY_MIGRATIONS bool `mapstructure:"apply_migrations" json:"apply_migrations"`
 	DB_DEBUG_LOG bool `mapstructure:"db_debug_log" json:"db_debug_log"`
 

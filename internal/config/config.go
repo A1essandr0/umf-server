@@ -25,7 +25,8 @@ func Init(env string) *models.Config {
 	if err != nil {
 		log.Fatal("Error on unmarshal config to struct")
 	}
-	log.Printf("Loaded config: %+v", conf)
+	log.Printf("Loaded config: %+v\n", conf)
+	log.Printf("App version: %s", ServiceVersion)
 
 	return &conf
 }

@@ -46,15 +46,16 @@ func NewKVStore(config *models.Config) KeyValueStore {
 
 
 func NewDBStore(config *models.Config) DBStore {
+	gormConfig := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	}
+	if config.DB_DEBUG_LOG {
+		gormConfig.Logger = logger.Default.LogMode(logger.Info)
+	}
+
+
 	switch config.DBSTORE_TYPE {		
 		case "postgres":
-			gormConfig := &gorm.Config{
-				Logger: logger.Default.LogMode(logger.Silent),
-			}
-			if config.DB_DEBUG_LOG {
-				gormConfig.Logger = logger.Default.LogMode(logger.Info)
-			}
-
 			DB, err := gorm.Open(postgres.New(postgres.Config{
 				DSN: config.DB_DSN,
 				PreferSimpleProtocol: false,
@@ -76,14 +77,23 @@ func NewDBStore(config *models.Config) DBStore {
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}
 		
-		default:
-			gormConfig := &gorm.Config{
-				Logger: logger.Default.LogMode(logger.Silent),
+		case "sqlite":
+			DB, err := gorm.Open(sqlite.Open(config.DB_FILE), gormConfig)
+			if err != nil {
+				log.Fatalf("Failed to initialise database: %+v", err)
 			}
-			if config.DB_DEBUG_LOG {
-				gormConfig.Logger = logger.Default.LogMode(logger.Info)
+			if err = DB.AutoMigrate(models.ModelsToAutoMigrate...); err != nil {
+				log.Fatalf("Couldn't apply or recognize sqlite DB schema: %+v", err)
+			}
+			log.Println("Sqlite migrations applied")
+
+			log.Println("Sqlite DB initialised")
+			return &MStore{
+				DB: DB,
+				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}
 
+		default:
 			DB, err := gorm.Open(sqlite.Open(":memory:"), gormConfig)
 			if err != nil {
 				log.Fatalf("Failed to initialise database: %+v", err)

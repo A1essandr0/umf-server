@@ -13,6 +13,7 @@ REDIS_DB_NUM: 0
 
 DBSTORE_TYPE: "postgres"
 DB_DSN: "postgres://umf_user:umf_pwd@localhost:5432/umf?sslmode=disable"
+DB_FILE: "umf_sqlite.db"
 APPLY_MIGRATIONS: true
 DB_DEBUG_LOG: false
 

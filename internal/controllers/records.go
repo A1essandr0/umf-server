@@ -6,12 +6,11 @@ import (
 )
 
 type RecordsController struct {
-	KV repositories.KeyValueStore
 	DB repositories.DBStore	
 }
 
-func NewRecordsController(kv repositories.KeyValueStore, db repositories.DBStore) *RecordsController {
-	return &RecordsController{KV: kv, DB: db}
+func NewRecordsController(db repositories.DBStore) *RecordsController {
+	return &RecordsController{DB: db}
 }
 
 
