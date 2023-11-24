@@ -1,4 +1,4 @@
-package server
+package dserver
 
 import (
 	"errors"
@@ -34,7 +34,7 @@ func Run(conf *models.Config, db repositories.DBStore, kvClient repositories.Key
 		log.Printf("Starting https server on %s, mode: %s", Config.WEB_PORT, Config.DEVELOPMENT_MODE)
 		httpStartError = server.ListenAndServeTLS(Config.CERT_FILE, Config.CERT_KEY_FILE)
 	} else {
-		log.Printf("Starting http server on %s", Config.WEB_PORT)
+		log.Printf("Starting http server on %s, mode: %s", Config.WEB_PORT, Config.DEVELOPMENT_MODE)
 		httpStartError = server.ListenAndServe()
 	}
 

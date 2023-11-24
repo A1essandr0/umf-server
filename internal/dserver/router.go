@@ -1,4 +1,4 @@
-package server
+package dserver
 
 import (
 	"net/http"

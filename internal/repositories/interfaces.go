@@ -48,12 +48,17 @@ func NewKVStore(config *models.Config) KeyValueStore {
 func NewDBStore(config *models.Config) DBStore {
 	switch config.DBSTORE_TYPE {		
 		case "postgres":
+			gormConfig := &gorm.Config{
+				Logger: logger.Default.LogMode(logger.Silent),
+			}
+			if config.DB_DEBUG_LOG {
+				gormConfig.Logger = logger.Default.LogMode(logger.Info)
+			}
+
 			DB, err := gorm.Open(postgres.New(postgres.Config{
 				DSN: config.DB_DSN,
 				PreferSimpleProtocol: false,
-			}), &gorm.Config{
-				Logger: logger.Default.LogMode(logger.Info),
-			})
+			}), gormConfig)
 			if err != nil {
 				log.Fatalf("Failed to initialise database: %+v", err)
 			}
@@ -72,9 +77,14 @@ func NewDBStore(config *models.Config) DBStore {
 			}
 		
 		default:
-			DB, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{
-				Logger: logger.Default.LogMode(logger.Info),
-			})
+			gormConfig := &gorm.Config{
+				Logger: logger.Default.LogMode(logger.Silent),
+			}
+			if config.DB_DEBUG_LOG {
+				gormConfig.Logger = logger.Default.LogMode(logger.Info)
+			}
+
+			DB, err := gorm.Open(sqlite.Open(":memory:"), gormConfig)
 			if err != nil {
 				log.Fatalf("Failed to initialise database: %+v", err)
 			}
