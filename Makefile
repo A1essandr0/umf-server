@@ -32,6 +32,17 @@ deploy:
 	echo 'Removing build files...'
 	rm umf
 
+deploy-kite:
+	echo 'Compiling...'
+	go build -o ${BINARY_OUT} ${APP_ENTRY_POINT}
+	echo 'Deploying to Kite server...'
+	rsync -uazp umf ${PK_SERVER_USER}@${PK_SERVER_HOST}:${PK_SERVER_PATH}
+	rsync -uazp cmd/config.yaml ${PK_SERVER_USER}@${PK_SERVER_HOST}:${PK_SERVER_PATH}cmd/
+	echo 'Restarting service...'
+	ssh ${PK_SERVER_USER}@${PK_SERVER_HOST} 'sudo service umf restart'
+	echo 'Removing build files...'
+	rm umf
+
 
 build-image:
 	${DOCKER} build -t ${DOCKER_IMAGE_NAME} --network=host .

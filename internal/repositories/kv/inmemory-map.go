@@ -1,4 +1,4 @@
-package repositories
+package kv
 
 import (
 	"sync"
@@ -6,7 +6,7 @@ import (
 	"github.com/go-redis/redis/v8"
 )
 
-// using locks to be used more than just in mocks
+// using locks, so it can be used more than just in mocks
 type InmemoryKV struct {	
 	store map[string]string
 	mutex sync.RWMutex

@@ -1,4 +1,4 @@
-package repositories
+package kv
 
 import (
 	"time"
@@ -23,5 +23,3 @@ func (c *RedisClient) GetKVStoreRecord(key string) (string, error) {
 	value, err := c.Get(c.Context(), key).Result()
 	return value, err
 }
-
-
