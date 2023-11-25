@@ -12,20 +12,8 @@ import (
 )
 
 func NewKVStore(config *models.Config) repositories.KeyValueStore {
-	
-	switch config.KVSTORE_TYPE {
-		case "redis":
-			client := redis.NewClient(&redis.Options{
-				Addr:     config.REDIS_ADDR, 
-				Password: config.REDIS_PWD,
-				DB:       config.REDIS_DB_NUM,
-			})
-			if err := client.Ping(client.Context()).Err(); err != nil {
-				log.Fatalf("Failed to initialise key-value store: %+v", err)
-			}
-			log.Printf("Got Redis key-value store instance up on %s", config.REDIS_ADDR)
-			return &RedisClient{client, config.DEFAULT_TTL}
-		
+
+	switch config.KVSTORE_TYPE {		
 		case "postgres":
 			gormConfig := &gorm.Config{
 				Logger: logger.Default.LogMode(logger.Silent),
@@ -51,6 +39,20 @@ func NewKVStore(config *models.Config) repositories.KeyValueStore {
 
 			log.Println("Postgres store for KV initialised")
 			return &PostgresKVClient{db: DB}
+
+
+		case "redis":
+			client := redis.NewClient(&redis.Options{
+				Addr:     config.REDIS_ADDR, 
+				Password: config.REDIS_PWD,
+				DB:       config.REDIS_DB_NUM,
+			})
+			if err := client.Ping(client.Context()).Err(); err != nil {
+				log.Fatalf("Failed to initialise key-value store: %+v", err)
+			}
+			log.Printf("Got Redis key-value store instance up on %s", config.REDIS_ADDR)
+			return &RedisClient{client, config.DEFAULT_TTL}
+
 
 		default:
 			log.Println("Using inmemory key-value store")

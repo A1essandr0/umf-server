@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 
 type NewLinkEvent struct {
-	gorm.Model 
+	gorm.Model
 	Key string
 	Value string
 	UserIP string

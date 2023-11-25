@@ -20,10 +20,6 @@ func NewDBStore(config *models.Config) repositories.DBStore {
 	}
 
 	switch config.DBSTORE_TYPE {
-		case "mock":
-			log.Println("Using pure mock DB")
-			return &MockDB{}
-
 		case "postgres":
 			DB, err := gorm.Open(postgres.New(postgres.Config{
 				DSN: config.DB_DSN,
@@ -46,7 +42,7 @@ func NewDBStore(config *models.Config) repositories.DBStore {
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}
 		
-		// sqlite using file
+		// sqlite
 		case "sqlite":
 			DB, err := gorm.Open(sqlite.Open(config.DB_FILE), gormConfig)
 			if err != nil {
@@ -63,8 +59,7 @@ func NewDBStore(config *models.Config) repositories.DBStore {
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}
 
-		// inmemory sqlite
-		default:
+		case "sqlite-inmemory":
 			DB, err := gorm.Open(sqlite.Open(":memory:"), gormConfig)
 			if err != nil {
 				log.Fatalf("Failed to initialise database: %+v", err)
@@ -79,5 +74,9 @@ func NewDBStore(config *models.Config) repositories.DBStore {
 				db: DB,
 				DEFAULT_RECORDS_AMOUNT_TO_GET: config.DEFAULT_RECORDS_AMOUNT_TO_GET,
 			}
+
+		default:
+			log.Println("Using pure mock DB")
+			return &MockDB{}
 	}
 }
