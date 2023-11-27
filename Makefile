@@ -2,10 +2,11 @@
 
 GO := go
 DOCKER := docker
-APP_ENTRY_POINT := ./cmd/main.go
 BINARY_OUT := umf
+APP_ENTRY_POINT := ./cmd/main.go
 DOCKER_IMAGE_NAME := umf-service
 SERVICE_VERSION := ${shell cat __version__}
+
 
 run:
 	${GO} run ${APP_ENTRY_POINT}
@@ -46,6 +47,14 @@ deploy-kite:
 
 build-image:
 	${DOCKER} build -t ${DOCKER_IMAGE_NAME} --network=host .
+
+push-image:
+	${DOCKER} login -u ${DOCKER_IMAGE_REGISTRY_USER} -p ${DOCKER_IMAGE_REGISTRY_PASSWORD} ${DOCKER_IMAGE_REGISTRY_HOST}
+	${DOCKER} tag ${DOCKER_IMAGE_NAME} ${DOCKER_IMAGE_REGISTRY_HOST}/$(DOCKER_IMAGE_NAME):$(SERVICE_VERSION)
+	${DOCKER} push ${DOCKER_IMAGE_REGISTRY_HOST}/$(DOCKER_IMAGE_NAME):$(SERVICE_VERSION)
+
+run-image:
+	${DOCKER} run -it -p 10007:10007 -e UMF_DBSTORE_TYPE="mock" -e UMF_KVSTORE_TYPE="mock" $(DOCKER_IMAGE_NAME)
 
 
 bump-build-version:

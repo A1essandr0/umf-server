@@ -19,9 +19,7 @@ func (s *StdWebServer) Run() {
 	router := NewRouter(s.Config, s.LinksController, s.RecordsController)
 	server := &http.Server{
 		Addr: s.Config.WEB_PORT,
-		Handler: s.mockMiddleWare(
-			s.corsMiddleWare(router),
-		),
+		Handler: s.corsMiddleWare(router),
 	}
 
 	var httpStartError error

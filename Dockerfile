@@ -16,4 +16,9 @@ FROM gcr.io/distroless/static-debian11
 
 WORKDIR /app
 
+COPY --from=busybox:1.35.0-uclibc /bin/sh /bin/sh
+
 COPY --from=builder /install/umf /app
+COPY --from=builder /install/cmd/config.yaml /app/cmd/config.yaml
+
+CMD ./umf
