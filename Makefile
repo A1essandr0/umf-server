@@ -16,10 +16,10 @@ mockrun:
 
 
 test-verbose:
-	${GO} test -v
+	${GO} test -v ./tests
 
 test:
-	${GO} test
+	${GO} test ./tests
 
 
 deploy:

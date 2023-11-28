@@ -22,19 +22,13 @@ func (s *StdWebServer) Run() {
 		Handler: s.corsMiddleWare(router),
 	}
 
-	var httpStartError error
-	if s.Config.USE_TLS {
-		log.Printf("Starting https server on %s, mode: %s", s.Config.WEB_PORT, s.Config.DEVELOPMENT_MODE)
-		httpStartError = server.ListenAndServeTLS(s.Config.CERT_FILE, s.Config.CERT_KEY_FILE)
-	} else {
-		log.Printf("Starting http server on %s, mode: %s", s.Config.WEB_PORT, s.Config.DEVELOPMENT_MODE)
-		httpStartError = server.ListenAndServe()
-	}
+	log.Printf("Starting http server on %s, mode: %s", s.Config.WEB_PORT, s.Config.DEVELOPMENT_MODE)
+	err := server.ListenAndServe()
 
-	if errors.Is(httpStartError, http.ErrServerClosed) {
+	if errors.Is(err, http.ErrServerClosed) {
 		log.Println("... server stopped")
-	} else if httpStartError != nil {
-		log.Printf("Error starting server: %s", httpStartError)
+	} else if err != nil {
+		log.Printf("Error starting server: %s", err)
 	}
 }
 

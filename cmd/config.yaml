@@ -4,7 +4,7 @@ WEB_PORT: "0.0.0.0:10007"
 
 PRODUCTION_CORS: "*"
 
-KVSTORE_TYPE: "redis" # postgres, redis, inmemory map
+KVSTORE_TYPE: "redis" # postgres, redis, inmemory map/mock
 DEFAULT_TTL: 0
 
 REDIS_ADDR: "localhost:6379"
@@ -16,10 +16,6 @@ DB_DSN: "postgres://umf_user:umf_pwd@localhost:5432/umf?sslmode=disable"
 DB_FILE: "umf_sqlite.db"
 APPLY_MIGRATIONS: true
 DB_DEBUG_LOG: false
-
-USE_TLS: false
-CERT_FILE: ""
-CERT_KEY_FILE: ""
 
 DEFAULT_RECORDS_AMOUNT_TO_GET: 5
 HASH_LENGTH: 8

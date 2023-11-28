@@ -19,10 +19,6 @@ type Config struct {
 	APPLY_MIGRATIONS bool `mapstructure:"apply_migrations" json:"apply_migrations"`
 	DB_DEBUG_LOG bool `mapstructure:"db_debug_log" json:"db_debug_log"`
 
-	USE_TLS bool `mapstructure:"use_tls" json:"use_tls"`
-	CERT_FILE string `mapstructure:"cert_file" json:"cert_file"`
-	CERT_KEY_FILE string `mapstructure:"cert_key_file" json:"cert_key_file"`
-
 	DEFAULT_RECORDS_AMOUNT_TO_GET int `mapstructure:"default_records_amount_to_get" json:"default_records_amount_to_get"`
 	HASH_LENGTH int `mapstructure:"hash_length" json:"hash_length"`
 }
