@@ -7,9 +7,9 @@ import (
 )
 
 // using locks, so it can be used more than just in mocks
-type InmemoryKV struct {	
-	store map[string]string
+type InmemoryKV struct {
 	mutex sync.RWMutex
+	store map[string]string
 }
 
 func (kv *InmemoryKV) CreateKVStoreRecord(key, value string) error {
